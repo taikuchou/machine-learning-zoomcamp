@@ -5,12 +5,13 @@ from flask import request
 from flask import jsonify
 
 
-model_file = 'rfc_model_n_estimators=21_max_depth=5_min_samples_leaf=1.bin'
+model_file = 'model.bin'
 
 with open(model_file, 'rb') as f_in:
     dv, model = pickle.load(f_in)
 
 app = Flask('diabetes_prediction')
+
 
 @app.route('/predict', methods=['POST'])
 def predict():

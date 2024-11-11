@@ -1,8 +1,8 @@
-# First install the python 3.8, the slim version uses less space
-FROM python:3.8.12-slim
+# First install the python 3.13, the slim version uses less space
+FROM python:3.13.0-bullseye
 
 # Install pipenv library in Docker 
-RUN pip install gunicorn pipenv markupsafe numpy scikit-learn werkzeug blinker
+RUN pip install gunicorn pipenv markupsafe numpy scikit-learn==1.5.2 werkzeug blinker
 
 WORKDIR /. 
 

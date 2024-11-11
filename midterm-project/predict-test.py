@@ -35,6 +35,6 @@ response = requests.post(url, json=patient).json()
 print(response)
 
 if response['diabetes'] == True:
-    print('sending an appointment email to %s' % patient_id)
+    print('Sending an appointment email to %s' % patient_id)
 else:
-    print('not sending an appointment email to %s' % patient_id)
+    print('NOT sending an appointment email to %s' % patient_id)

@@ -97,48 +97,49 @@ X_train = dv.fit_transform(train_dicts)
 val_dicts = df_val.fillna(0).to_dict(orient='records')
 X_val = dv.transform(val_dicts)
 
-
+depths = [1, 2, 3, 4, 5, 6, 10, 15, 20, 40, None]
 scores = []
-
-for n in tqdm(range(1, 26, 2)):
-    rf = RandomForestClassifier(n_estimators=n,
-                                max_depth=max_depth,
-                                min_samples_leaf=min_samples_leaf,
-                                random_state=1)
-    rf.fit(X_train, y_train)
-    y_pred = rf.predict_proba(X_val)[:, 1]
+for depth in depths:
+    dt = DecisionTreeClassifier(max_depth=depth, class_weight='balanced')
+    dt.fit(X_train, y_train)
+    y_pred = dt.predict_proba(X_val)[:, 1]
     auc = roc_auc_score(y_val, y_pred)
-    scores.append((max_depth, n, auc))
+    print('%4s -> %.3f' % (depth, auc))
 
-print('validation results:')
-print('n_estimators= %.0f ,max_depth= %.0f, min_samples_leaf = %.0f' %
-      (n_estimators, max_depth, min_samples_leaf))
-columns = ['max_depth', 'n_estimators', 'auc']
+print()
+scores = []
+for depth in [4, 5, 6]:
+    for s in [1, 5, 10, 15, 20]:
+        dt = DecisionTreeClassifier(
+            max_depth=depth, min_samples_leaf=s, class_weight='balanced')
+        dt.fit(X_train, y_train)
+
+        y_pred = dt.predict_proba(X_val)[:, 1]
+        auc = roc_auc_score(y_val, y_pred)
+
+        scores.append((depth, s, auc))
+
+columns = ['max_depth', 'min_samples_leaf', 'auc']
 df_scores = pd.DataFrame(scores, columns=columns)
-print(df_scores)
-
+idm = df_scores['auc'].idxmax()
+print(df_scores.iloc[idm])
+print()
 # training the final model
 df_train, df_val, y_train, y_val = generate_data(data)
+max_depth = 5
+min_samples_leaf = 10
 dv = DictVectorizer(sparse=False)
 train_dicts = df_train.fillna(0).to_dict(orient='records')
 X_train = dv.fit_transform(train_dicts)
 val_dicts = df_val.fillna(0).to_dict(orient='records')
 X_val = dv.transform(val_dicts)
-n_estimators = 21
-max_depth = 5
-min_samples_leaf = 1
-rf = RandomForestClassifier(n_estimators=n_estimators,
-                            max_depth=max_depth,
-                            min_samples_leaf=min_samples_leaf,
-                            random_state=1)
-rf.fit(X_train, y_train)
-y_pred = rf.predict_proba(X_val)[:, 1]
-auc = roc_auc_score(y_val, y_pred)
-print(f'auc={auc}')
+model = DecisionTreeClassifier(
+    max_depth=max_depth, min_samples_leaf=min_samples_leaf, class_weight='balanced')
+model.fit(X_train, y_train)
 
 
-def save_model(dv, model, n_estimators=n_estimators, max_depth=max_depth, min_samples_leaf=min_samples_leaf):
-    output_file = f'rfc_model_n_estimators={n_estimators}_max_depth={max_depth}_min_samples_leaf={min_samples_leaf}.bin'
+def save_model(dv, model, max_depth=5, min_samples_leaf=15):
+    output_file = f'model.bin'
     f_out = open(output_file, 'wb')
     pickle.dump((dv, model), f_out)
     f_out.close()
@@ -146,5 +147,5 @@ def save_model(dv, model, n_estimators=n_estimators, max_depth=max_depth, min_sa
 
 
 # Save the model
-output_file = save_model(dv, rf)
-print(f'the model is saved to {output_file}')
+output_file = save_model(dv, model)
+print(f'The model is saved to {output_file}')
