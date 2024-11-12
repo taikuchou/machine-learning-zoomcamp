@@ -67,6 +67,7 @@
   ```
 - **Models**:
   - Train models such as Logistic Regression, Decision Trees, and Random Forests.
+  - Tuning: Use GridSearchCV to tune hyperparameters.
   - See `mid_project_notebook.ipynb`
 - **Evaluation Metrics**:
 
@@ -76,95 +77,142 @@
 
   - `Class 1` means non-diabetes
 
-  - Logistic Regression Classification Report {C=5}
+  - Logistic Regression Model Report
 
-    | Metric        | Class 0 | Class 1 | Average |
-    | ------------- | ------- | ------- | ------- |
-    | **Precision** | 0.93    | 0.53    | -       |
-    | **Recall**    | 0.75    | 0.83    | -       |
-    | **F1 Score**  | 0.83    | 0.65    | -       |
-    | **Support**   | 83      | 29      | 112     |
+    - Best Hyperparameters
 
-    **Overall Metrics**:
+      - `C`: 10
+      - `class_weight`: balanced
+      - `penalty`: l1
 
-    - **Accuracy**: 0.77
-    - **Macro Avg Precision**: 0.73
-    - **Macro Avg Recall**: 0.79
-    - **Macro Avg F1 Score**: 0.74
-    - **Weighted Avg Precision**: 0.82
-    - **Weighted Avg Recall**: 0.77
-    - **Weighted Avg F1 Score**: 0.78
+    - Classification Report
 
-    **Additional Metrics**:
+      | Metric        | Class 0 | Class 1 | Average |
+      | ------------- | ------- | ------- | ------- |
+      | **Precision** | 0.93    | 0.56    | -       |
+      | **Recall**    | 0.77    | 0.83    | -       |
+      | **F1 Score**  | 0.84    | 0.67    | -       |
+      | **Support**   | 83      | 29      | 112     |
 
-    - **Precision (Class 1)**: 0.5454
-    - **Recall (Class 1)**: 0.8276
-    - **F1 Score (Class 1)**: 0.6575
-    - **AUC-ROC Score**: 0.870
+    - Overall Metrics:
 
-  - Decision Trees {max_depth=5, min_samples_leaf=10}
+      - **Accuracy**: 0.79
+      - **Macro Avg Precision**: 0.74
+      - **Macro Avg Recall**: 0.80
+      - **Macro Avg F1 Score**: 0.75
+      - **Weighted Avg Precision**: 0.83
+      - **Weighted Avg Recall**: 0.79
+      - **Weighted Avg F1 Score**: 0.80
 
-    | Metric        | Class 0 | Class 1 | Average |
-    | ------------- | ------- | ------- | ------- |
-    | **Precision** | 0.93    | 0.55    | -       |
-    | **Recall**    | 0.76    | 0.83    | -       |
-    | **F1 Score**  | 0.83    | 0.66    | -       |
-    | **Support**   | 83      | 29      | 112     |
+    - Class 1 Metrics:
 
-    **Overall Metrics**:
+      - **Precision**: 0.5581
+      - **Recall**: 0.8276
+      - **F1 Score**: 0.6667
+      - **AUC-ROC Score**: 0.8695
 
-    - **Accuracy**: 0.78
-    - **Macro Avg Precision**: 0.74
-    - **Macro Avg Recall**: 0.79
-    - **Macro Avg F1 Score**: 0.75
-    - **Weighted Avg Precision**: 0.83
-    - **Weighted Avg Recall**: 0.78
-    - **Weighted Avg F1 Score**: 0.79
+    - Interpretation
 
-    **Additional Metrics**:
+      The Logistic Regression model with these hyperparameters achieves a balanced performance, with a high recall for class `1` (0.83) and a good AUC-ROC score, suggesting effective discrimination between classes. This model is well-suited for identifying positive cases (class `1`) in the dataset.
 
-    - **Precision (Class 1)**: 0.5641
-    - **Recall (Class 1)**: 0.7856
-    - **F1 Score (Class 1)**: 0.6470
-    - **AUC-ROC Score**: 0.8151
+  - Decision Trees Classifier Model Report
 
-  - Random Forests {max_depth=5, min_samples_leaf=3, n_estimators=140}
+    - Best Hyperparameters
 
-    | Metric        | Class 0 | Class 1 | Average |
-    | ------------- | ------- | ------- | ------- |
-    | **Precision** | 0.83    | 0.86    | -       |
-    | **Recall**    | 0.98    | 0.41    | -       |
-    | **F1 Score**  | 0.90    | 0.56    | -       |
-    | **Support**   | 83      | 29      | 112     |
+      - `class_weight`: balanced
+      - `criterion`: gini
+      - `max_depth`: 10
+      - `min_samples_leaf`: 4
+      - `min_samples_split`: 2
 
-    **Overall Metrics**:
+    - Classification Report
 
-    - **Accuracy**: 0.83
-    - **Macro Avg Precision**: 0.84
-    - **Macro Avg Recall**: 0.69
-    - **Macro Avg F1 Score**: 0.73
-    - **Weighted Avg Precision**: 0.83
-    - **Weighted Avg Recall**: 0.83
-    - **Weighted Avg F1 Score**: 0.81
+      | Metric        | Class 0 | Class 1 | Average |
+      | ------------- | ------- | ------- | ------- |
+      | **Precision** | 0.82    | 0.43    | -       |
+      | **Recall**    | 0.76    | 0.52    | -       |
+      | **F1 Score**  | 0.79    | 0.47    | -       |
+      | **Support**   | 83      | 29      | 112     |
 
-    **Additional Metrics**:
+    - Overall Metrics:
 
-    - **Precision (Class 1)**: 0.8571
-    - **Recall (Class 1)**: 0.4138
-    - **F1 Score (Class 1)**: 0.5581
-    - **AUC-ROC Score**: 0.8799
+      - **Accuracy**: 0.70
+      - **Macro Avg Precision**: 0.62
+      - **Macro Avg Recall**: 0.64
+      - **Macro Avg F1 Score**: 0.63
+      - **Weighted Avg Precision**: 0.72
+      - **Weighted Avg Recall**: 0.70
+      - **Weighted Avg F1 Score**: 0.70
+
+    - Class 1 Metrics:
+
+      - **Precision**: 0.4286
+      - **Recall**: 0.5172
+      - **F1 Score**: 0.4688
+      - **AUC-ROC Score**: 0.6610
+
+    - Interpretation
+
+      The Decision Tree Classifier with these hyperparameters achieves moderate performance, with a focus on balanced class weights. While it has good precision and recall for class `0`, the performance for class `1` is lower, which might impact its ability to detect positive cases. The AUC-ROC score of 0.6610 suggests limited discriminative power between classes, indicating that further tuning or an alternative model might improve results.
+
+  - Random Forests Classifier Model Report
+
+    - Best Hyperparameters
+
+      - `class_weight`: balanced
+      - `max_depth`: 10
+      - `min_samples_leaf`: 4
+      - `min_samples_split`: 10
+      - `n_estimators`: 100
+
+    - Classification Report
+
+      | Metric        | Class 0 | Class 1 | Average |
+      | ------------- | ------- | ------- | ------- |
+      | **Precision** | 0.91    | 0.58    | -       |
+      | **Recall**    | 0.81    | 0.76    | -       |
+      | **F1 Score**  | 0.85    | 0.66    | -       |
+      | **Support**   | 83      | 29      | 112     |
+
+    - Overall Metrics:
+
+      - **Accuracy**: 0.79
+      - **Macro Avg Precision**: 0.74
+      - **Macro Avg Recall**: 0.78
+      - **Macro Avg F1 Score**: 0.76
+      - **Weighted Avg Precision**: 0.82
+      - **Weighted Avg Recall**: 0.79
+      - **Weighted Avg F1 Score**: 0.80
+
+    - Class 1 Metrics:
+
+      - **Precision**: 0.5789
+      - **Recall**: 0.7586
+      - **F1 Score**: 0.6567
+      - **AUC-ROC Score**: 0.8538
+
+    - Interpretation
+
+      The Random Forest Classifier with these hyperparameters performs well, with high recall (0.76) and a good balance between precision and recall for class `1`. This model also achieved a strong AUC-ROC score of 0.8538, indicating good discriminative power. Its ability to handle class imbalance with balanced class weights makes it suitable for identifying positive cases in the dataset.
 
     ### Model Selection Reasoning
 
-    The **`Decision Tree Classifier`** is recommended as the best model due to its balance between recall and precision for the minority class (class `1`). This balance is reflected in the high F1 score for class `1`. Here’s why the Decision Tree stands out:
+    #### Summary of Model Performance
 
-    - **`Balanced Recall and Precision`**: With a recall of 0.83 and a precision of 0.55 for class `1`, the Decision Tree captures a high proportion of true positives without generating too many false positives. This balance is ideal for scenarios where both precision and recall are important.
+    | Model                     | Class 1 Precision | Class 1 Recall | Class 1 F1 Score | Accuracy | AUC-ROC |
+    | ------------------------- | ----------------- | -------------- | ---------------- | -------- | ------- |
+    | **`Logistic Regression`** | `0.56`            | `0.83`         | `0.67`           | `0.79`   | `0.870` |
+    | **Random Forest**         | 0.58              | 0.76           | 0.66             | 0.79     | 0.854   |
+    | **Decision Tree**         | 0.43              | 0.52           | 0.47             | 0.70     | 0.661   |
 
-    - **`Interpretability`**: Decision Trees provide interpretability, making it easy to understand feature importance and the paths leading to each decision. This transparency is valuable when explaining the model’s decisions.
+    - **Best Model**: **`Logistic Regression`** is recommended if high recall and strong overall performance are priorities. With the highest recall and AUC-ROC score, it effectively captures positive cases while maintaining good precision.
+    - **Alternative Choice**: **Random Forest Classifier** is a strong alternative if a more balanced precision-recall trade-off is desired. It has a comparable F1 score and strong accuracy, with added robustness from the ensemble approach.
 
-    - **`Comparable AUC-ROC`**: Although the AUC-ROC score for the Decision Tree is slightly lower than that of the Random Forest, it remains competitive, indicating that the model discriminates reasonably well between classes.
+    - **Least Preferred Model**: **Decision Tree Classifier** is the least suitable choice due to lower performance across all metrics compared to Logistic Regression and Random Forest.
 
-    While the **`Random Forest`** has the highest AUC-ROC and precision for class `1`, its low recall (0.41) may be inadequate if the goal is to identify as many positive cases as possible. The **`Logistic Regression`** model also performs well, but the Decision Tree provides a slightly better F1 score for class `1` and added interpretability, making it the more balanced choice overall.
+    ### Conclusion
+
+    Overall, **`Logistic Regression`** is the recommended model due to its high recall, solid F1 score, and the highest AUC-ROC score, providing effective balance and discriminative power. **Random Forest** can be considered as an alternative for more balanced performance, while **Decision Tree** is not recommended due to weaker performance.
 
 - **Model Training Python Script**:
   ```console

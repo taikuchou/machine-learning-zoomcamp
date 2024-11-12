@@ -7,10 +7,11 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mutual_info_score, accuracy_score, roc_curve, roc_auc_score
+from sklearn.metrics import classification_report, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier, export_text
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
 import pickle
 from tqdm.auto import tqdm
 import warnings
@@ -74,6 +75,8 @@ numerical.remove(target_label)
 global_obese = data.Outcome.mean()
 global_obese
 
+target_label = "Outcome"
+
 
 def generate_data(data):
     df_full_train, df_test = train_test_split(
@@ -84,61 +87,81 @@ def generate_data(data):
     y_val = df_test[target_label].values
     del df_full_train[target_label]
     del df_test[target_label]
-    return df_train, df_val, y_train, y_val
+    dv = DictVectorizer(sparse=False)
+    train_dicts = df_train.fillna(0).to_dict(orient='records')
+    X_train = dv.fit_transform(train_dicts)
+    val_dicts = df_val.fillna(0).to_dict(orient='records')
+    X_val = dv.transform(val_dicts)
+    return df_train, df_val, y_train, y_val, dv, X_train, X_val
 
 
-df_train, df_val, y_train, y_val = generate_data(data)
+def classification_evaluation_report(y_test, y_pred, title, best_params, t=0.5):
+    print(f"{title} Classification Report: {best_params}")
+    # Adjust threshold as needed
+    print(classification_report(y_test, y_pred >= t))
+    # Calculate each metric individually
+    precision = precision_score(y_test, y_pred >= t)
+    recall = recall_score(y_test, y_pred >= t)
+    f1 = f1_score(y_test, y_pred >= t)
+    auc_roc = roc_auc_score(y_test, y_pred)
+
+    print(f"Precision: {precision}")
+    print(f"Recall: {recall}")
+    print(f"F1 Score: {f1}")
+    print(f"AUC-ROC Score: {auc_roc}")
+
+
+random_state = 42
+
+
+# Use 'f1' for imbalanced classes or 'roc_auc' for overall performance,# cv=5: 5-fold cross-validation
+def evaluation_model(title, model, param_grid, cv=5, scoring='f1'):
+
+    # Configure GridSearchCV
+    grid_search = GridSearchCV(
+        estimator=model,
+        param_grid=param_grid,
+        cv=cv,
+        scoring=scoring,
+        verbose=1,
+        n_jobs=-1  # Use all available cores
+    )
+    # Fit the model with GridSearchCV
+    grid_search.fit(X_train, y_train)
+
+    # Get the best parameters and the best estimator
+    best_params = grid_search.best_params_
+    best_model = grid_search.best_estimator_
+    print()
+    print("Best Hyperparameters:", best_params)
+    print()
+    # Step 5: Evaluate the best model
+    y_pred = best_model.predict(X_val)
+    y_pred_proba = best_model.predict_proba(X_val)[:, 1]
+    classification_evaluation_report(
+        y_val, y_pred, "LogisticRegression", best_params)
+    return (best_params, best_model)
 
 # validation
 
-dv = DictVectorizer(sparse=False)
-train_dicts = df_train.fillna(0).to_dict(orient='records')
-X_train = dv.fit_transform(train_dicts)
-val_dicts = df_val.fillna(0).to_dict(orient='records')
-X_val = dv.transform(val_dicts)
 
-depths = [1, 2, 3, 4, 5, 6, 10, 15, 20, 40, None]
-scores = []
-for depth in depths:
-    dt = DecisionTreeClassifier(max_depth=depth, class_weight='balanced')
-    dt.fit(X_train, y_train)
-    y_pred = dt.predict_proba(X_val)[:, 1]
-    auc = roc_auc_score(y_val, y_pred)
-    print('%4s -> %.3f' % (depth, auc))
+df_train, df_val, y_train, y_val, dv, X_train, X_val = generate_data(data)
 
-print()
-scores = []
-for depth in [4, 5, 6]:
-    for s in [1, 5, 10, 15, 20]:
-        dt = DecisionTreeClassifier(
-            max_depth=depth, min_samples_leaf=s, class_weight='balanced')
-        dt.fit(X_train, y_train)
+model_lr = LogisticRegression(solver='liblinear', random_state=random_state)
 
-        y_pred = dt.predict_proba(X_val)[:, 1]
-        auc = roc_auc_score(y_val, y_pred)
+# Set up the hyperparameter grid
+param_grid_lr = {
+    'C': [0.001, 0.01, 0.1, 1, 10, 100],  # Regularization strength
+    'penalty': ['l1', 'l2'],  # Penalty type (L1 or L2 regularization)
+    'class_weight': ['balanced', None]
+}
+best_params_lr, best_model_lr = evaluation_model(
+    "LogisticRegression", model_lr, param_grid_lr)
 
-        scores.append((depth, s, auc))
-
-columns = ['max_depth', 'min_samples_leaf', 'auc']
-df_scores = pd.DataFrame(scores, columns=columns)
-idm = df_scores['auc'].idxmax()
-print(df_scores.iloc[idm])
-print()
-# training the final model
-df_train, df_val, y_train, y_val = generate_data(data)
-max_depth = 5
-min_samples_leaf = 10
-dv = DictVectorizer(sparse=False)
-train_dicts = df_train.fillna(0).to_dict(orient='records')
-X_train = dv.fit_transform(train_dicts)
-val_dicts = df_val.fillna(0).to_dict(orient='records')
-X_val = dv.transform(val_dicts)
-model = DecisionTreeClassifier(
-    max_depth=max_depth, min_samples_leaf=min_samples_leaf, class_weight='balanced')
-model.fit(X_train, y_train)
+# print(best_params_lr, best_model_lr)
 
 
-def save_model(dv, model, max_depth=5, min_samples_leaf=15):
+def save_model(dv, model):
     output_file = f'model.bin'
     f_out = open(output_file, 'wb')
     pickle.dump((dv, model), f_out)
@@ -147,5 +170,6 @@ def save_model(dv, model, max_depth=5, min_samples_leaf=15):
 
 
 # Save the model
-output_file = save_model(dv, model)
+output_file = save_model(dv, best_model_lr)
+print()
 print(f'The model is saved to {output_file}')
