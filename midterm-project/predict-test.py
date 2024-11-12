@@ -31,7 +31,7 @@ patient2 = {
     "BMI_Category_Overweight": 'false',
     "BMI_Category_Obese": 'true'}
 
-response = requests.post(url, json=patient).json()
+response = requests.post(url, json=patient2).json()
 print(response)
 
 if response['diabetes'] == True:
