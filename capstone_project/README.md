@@ -139,7 +139,11 @@ The dataset contains information about cars and their features, which are used t
    ```bash
    python train.py
    ```
-5. Launch Web Application:
+5. Model Testing by using python:
+   ```bash
+   python test.py
+   ```
+6. Launch Web Application:
    - Run the prediction service using Streamlit:
    ```bash
    streamlit run predict.py
