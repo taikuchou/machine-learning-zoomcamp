@@ -1,0 +1,72 @@
+Obtain AWS Access Credentials
+Before configuring AWS CLI, you need your Access Key ID and Secret Access Key. These can be created or retrieved from the AWS Management Console:
+
+Log in to the AWS Management Console.
+Navigate to IAM > Users.
+Select your user name and go to the Security credentials tab.
+Create an access key if you don’t already have one.
+
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738574173.dkr.ecr.us-east-1.amazonaws.com/ml-hw9
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    }
+  ]
+}
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:DescribeRepositories",
+        "ecr:DeleteRepository",
+        "ecr:GetRepositoryPolicy",
+        "ecr:SetRepositoryPolicy",
+        "ecr:PutImage",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchDeleteImage",
+        "ecr:BatchGetImage",
+        "ecr:ListImages"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
+      ],
+      "Resource": "arn:aws:ecr:us-east-1:588738574173:repository/ml-hw9"
+    }
+  ]
+}
+
+docker tag model-2024-hairstyle-lambda:latest 588738574173.dkr.ecr.us-east-1.amazonaws.com/ml-hw9
+
+docker push 588738574173.dkr.ecr.us-east-1.amazonaws.com/ml-hw9
+
+Create Lambda FunctionConfiguration => RAM:1024M, Timrout:1:50
+
+Create API Gateway -> Rest API -> New API, API name -> Create resource: resource name: predict -> Create method: POST -> Create method -> Test -> set Request body 
+
+Deploy -> Create State
+
+
